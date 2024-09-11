@@ -208,7 +208,9 @@ func main() {
 			}
 		}
 		if len(unreadNews) == 0 {
-			continue
+
+			log.Printf("no news, sleep\n")
+			time.Sleep(time.Minute * 10)
 		}
 
 		for _, news := range unreadNews {
@@ -240,20 +242,21 @@ func main() {
 		fmt.Println("JSON data successfully written to news.json")
 
 		output, err := exec.Command("git", "commit", "-am", "update").CombinedOutput()
-		log.Printf("cmd %v %v", err, output)
+		log.Printf("cmd %v %v", err, string(output))
 		output, err = exec.Command("git", "push").CombinedOutput()
-		log.Printf("cmd %v %v", err, output)
+		log.Printf("cmd %v %v", err, string(output))
 		output, err = exec.Command("git", "tag", fmt.Sprintf("v%v.%v.%v", config.Version[0], config.Version[1], config.Version[2]+1)).CombinedOutput()
-		log.Printf("cmd %v %v", err, output)
+		log.Printf("cmd %v %v", err, string(output))
 		output, err = exec.Command("git", "push", "origin", "tag", fmt.Sprintf("v%v.%v.%v", config.Version[0], config.Version[1], config.Version[2]+1)).CombinedOutput()
-		log.Printf("cmd %v %v", err, output)
+		log.Printf("cmd %v %v", err, string(output))
 		if err != nil {
+			fmt.Printf("push fail")
+		} else {
 
-			continue
+			config.Version[2] += 1
+			SaveToJSONFile("config.json", config)
 		}
-		config.Version[2] += 1
-		SaveToJSONFile("config.json", config)
-
+		log.Printf("sleep\n")
 		time.Sleep(time.Minute * 10)
 	}
 }
