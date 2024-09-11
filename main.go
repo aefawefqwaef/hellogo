@@ -77,7 +77,7 @@ func extractContentAndImageURL(n *html.Node) {
 						start := strings.Index(a.Val, "url('") + 5
 						end := strings.Index(a.Val, "')")
 						imageURL := a.Val[start:end]
-						fmt.Printf("Background Image URL: %s\n", imageURL)
+						// fmt.Printf("Background Image URL: %s\n", imageURL)
 						imgData := GetImageBase64(imageURL)
 						NewsList = append(NewsList, News{Img: imgData})
 					}
@@ -93,8 +93,8 @@ func extractContentAndImageURL(n *html.Node) {
 				extractText(n, &contentBuilder)
 				content := contentBuilder.String()
 				content = strings.ReplaceAll(content, "<br />", "\n")
-				fmt.Printf("Content: %s\n", content)
-				fmt.Printf("==============\n\n")
+				// fmt.Printf("Content: %s\n", content)
+				// fmt.Printf("==============\n\n")
 				if len(NewsList) == 0 || NewsList[len(NewsList)-1].Text != "" {
 					NewsList = append(NewsList, News{})
 				}
