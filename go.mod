@@ -1,4 +1,4 @@
-module hellogo
+module main
 
 go 1.20.0
 

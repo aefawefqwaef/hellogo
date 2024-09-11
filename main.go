@@ -1,4 +1,4 @@
-package hellogo
+package main
 
 import (
 	"encoding/base64"
@@ -164,6 +164,7 @@ func main() {
 		}
 
 		fmt.Println("JSON data successfully written to news.json")
+
 		time.Sleep(time.Minute * 10)
 	}
 }
