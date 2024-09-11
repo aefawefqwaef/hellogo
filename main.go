@@ -1,12 +1,16 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -136,11 +140,81 @@ func fetchNews(url string) {
 	extractContentAndImageURL(doc)
 }
 
+type Config struct {
+	Version [3]int   `json:"version"`
+	Hash    []string `json:"hash"`
+}
+
+func ReadJSONFile(filename string, v any) error {
+	// 打开文件
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 读取文件内容
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	// 解析JSON数据
+	if err := json.Unmarshal(data, v); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SaveToJSONFile(filename string, data interface{}) error {
+	// 将数据编码为 JSON 格式
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// 将 JSON 数据写入文件
+	err = ioutil.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func CalculateMD5(s string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(s))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
 func main() {
 	for {
 
 		NewsList = []News{}
 		fetchNews("https://t.me/s/tnews365")
+
+		var config Config
+		ReadJSONFile("config.json", &config)
+		md5s := make(map[string]bool)
+		for _, md5 := range config.Hash {
+			md5s[md5] = true
+		}
+		var unreadNews []News
+		for _, news := range NewsList {
+			md5 := CalculateMD5(news.Img + news.Text)
+			if exist := md5s[md5]; !exist {
+				unreadNews = append(unreadNews, news)
+			}
+		}
+		if len(unreadNews) == 0 {
+			continue
+		}
+
+		for _, news := range unreadNews {
+			md5 := CalculateMD5(news.Img + news.Text)
+			config.Hash = append(config.Hash, md5)
+		}
 
 		// 将 NewsList 转换为 JSON
 		jsonData, err := json.MarshalIndent(NewsList, "", "  ")
@@ -164,6 +238,21 @@ func main() {
 		}
 
 		fmt.Println("JSON data successfully written to news.json")
+
+		output, err := exec.Command("git", "commit", "-am", "update").CombinedOutput()
+		log.Printf("cmd %v %v", err, output)
+		output, err = exec.Command("git", "push").CombinedOutput()
+		log.Printf("cmd %v %v", err, output)
+		output, err = exec.Command("git", "tag", fmt.Sprintf("v%v.%v.%v", config.Version[0], config.Version[1], config.Version[2]+1)).CombinedOutput()
+		log.Printf("cmd %v %v", err, output)
+		output, err = exec.Command("git", "push", "origin", "tag", fmt.Sprintf("v%v.%v.%v", config.Version[0], config.Version[1], config.Version[2]+1)).CombinedOutput()
+		log.Printf("cmd %v %v", err, output)
+		if err != nil {
+
+			continue
+		}
+		config.Version[2] += 1
+		SaveToJSONFile("config.json", config)
 
 		time.Sleep(time.Minute * 10)
 	}
