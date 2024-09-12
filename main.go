@@ -220,7 +220,7 @@ func main() {
 		}
 
 		// 将 NewsList 转换为 JSON
-		jsonData, err := json.MarshalIndent(NewsList, "", "  ")
+		jsonData, err := json.MarshalIndent(unreadNews, "", "  ")
 		if err != nil {
 			fmt.Println("Error marshalling to JSON:", err)
 			return
