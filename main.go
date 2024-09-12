@@ -211,6 +211,7 @@ func main() {
 
 			log.Printf("no news, sleep\n")
 			time.Sleep(time.Minute * 10)
+			continue
 		}
 
 		for _, news := range unreadNews {
