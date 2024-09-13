@@ -2,7 +2,7 @@
   "version": [
     0,
     0,
-    18
+    19
   ],
   "hash": [
     "195ba0174271791ddf7ada118f1d7ee9",
@@ -38,6 +38,7 @@
     "d41d8cd98f00b204e9800998ecf8427e",
     "03291735cdb6c1458c5ff4fc63816030",
     "1f8c6a1af6f3f63d84348024fa3fdc0a",
-    "be691d9b822164e29d9904e1a50bef2a"
+    "be691d9b822164e29d9904e1a50bef2a",
+    "241cde74627e1fcee05af130ab314094"
   ]
 }
